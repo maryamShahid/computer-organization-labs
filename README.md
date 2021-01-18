@@ -1,5 +1,5 @@
 # Computer Organization Labs
-This repository contains my solutions for Bilkent University's Computer Organization Lab Assignments.
+This repository contains my solutions for Bilkent University's Computer Organization (cs224) Lab Assignments.
 
 ## Lab Contents:
 
