@@ -1,7 +1,7 @@
-# cs224-Computer-Organization-Labs
+# Computer Organization Labs
 This repository contains my solutions for Bilkent University's Computer Organization Lab Assignments.
 
-## Lab Contents 📕
+## Lab Contents:
 
 - Lab1: Creating and Running Simple MIPS Assembly Language Programs <br/>
 - Lab2: MIPS Programming for Bit Manipulation and Dynamic Array Allocation <br/>
