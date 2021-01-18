@@ -1,0 +1,308 @@
+CS224
+Lab 01
+Section No: 01
+Maryam Shaihd
+21801344
+
+
+Part 1:
+
+.data
+     array:      .space 80
+     totalNo:    .asciiz "\nEnter the total number of integers: "
+     elements:   .asciiz "\nEnter elements to be stored in the array: \n"
+     displayArr: .asciiz "Array elements: "
+     space:      .asciiz "  "
+     yesPal:     .asciiz "\nThe array is a palindrome."
+     noPal:      .asciiz "\nThe array is NOT a palindrome."
+  
+      
+.text
+ 
+   main:
+        # Prompt the user to enter the total number of integers
+    	li $v0, 4
+       	la $a0, totalNo
+       	syscall
+       
+       	# Get the total number of integers
+       	li $v0, 5
+       	syscall
+       
+       	# Moving the value of n to t2
+       	addi $t2, $v0, 0 
+      
+	# Base case for palindrome
+      	beqz $v0, isPalindrome 
+      	beq  $v0, 1, isPalindrome 
+        
+	# Loading base address of array into t3  
+      	la $a1, array
+      	add $t3, $a1, 0
+
+	# Used to hold the next value
+      	move $s7, $v0
+      	move $t6, $v0
+      	move $t5, $a1 
+      
+      	# Prompt the user to enter array elements
+      	li $v0, 4
+      	la $a0, elements
+      	syscall
+      
+    # For loop for taking input into the array depending on the value of n
+    forToGetInput:
+      	li $v0, 5
+      	syscall
+      
+      	sw $v0, 0($t3)
+      	seq $t7, $t2, 1
+      	beq $t7, 1, inputsTaken 
+      	addi $t3, $t3, 4 
+      	addi $t2, $t2, -1 
+      	j forToGetInput
+      
+     inputsTaken:
+      	li $v0,4
+      	la $a0, displayArr
+      	syscall
+      	j forToDisplay
+  
+     # For loop to display array elements
+     forToDisplay:     
+     	lw $a0, 0($a1)
+     	li $v0, 1
+     	syscall
+     
+     	li $v0, 4
+     	la $a0, space
+     	syscall
+     
+     	beq $t6, 1, holdMiddleElement
+     	addi $a1, $a1, 4
+     	addi $t6, $t6, -1
+     	j forToDisplay
+  
+    holdMiddleElement:
+     	sra $t4, $s7, 1
+    	j checkIfPalindrome
+ 
+    checkIfPalindrome:
+    	
+	# Compare the first and last number of the array
+    	lw $s4, 0($t5)
+    	lw $s5, 0($a1)
+    
+    	bne $s4, $s5, notPalindrome
+    	addi $t5, $t5, 4 
+    	subi $a1, $a1, 4 
+    	addi $t4,$t4, -1
+    	beq  $t4, 0, isPalindrome
+  
+    	j checkIfPalindrome
+    	beq $a1, $t4, isPalindrome
+        
+    isPalindrome:
+     	la $a0, yesPal
+     	j quit
+ 
+    notPalindrome:
+     	la $a0, noPal
+     	j quit
+     
+    quit:
+     	# This signals the end of program
+     	li $v0, 4
+     	syscall
+     	li $v0,10
+     	syscall		 
+		
+
+Part 2: 
+
+.data
+	message:    .asciiz "The equation is x = a * ( b - c ) % d \n"
+	input:      .asciiz "Enter integers a, b, c, d sequentially: \n"
+	result:     .asciiz "Result: "	
+
+.text
+
+    main:
+	li $v0, 4
+	la $a0, message
+	syscall
+
+	# Prompt the user to input a, b, c, d
+	li $v0, 4 
+	la $a0, input
+	syscall
+	
+	# Store integers a, b, c, d
+	# $a0 = a, $a1 = b, $a2 = c, $a3 = d 
+	li $v0, 5
+	syscall
+	add $a0, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a1, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a2, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a3, $v0, 0
+	
+	# Calling function computeEquation
+	jal computeEquation
+	move $v1, $v0
+	
+	# Displaying result
+	addi $s0, $v0, 0
+	li $v0, 4 
+	la $a0, result
+	syscall
+	
+	li $v0, 1
+	move $a0, $v1
+	syscall
+	
+	# This signals the end of program
+	li $v0, 10
+    	syscall
+    	
+    computeEquation: 
+	sub $t0, $a1, $a2 # b - c
+	mult $a0, $t0 # a * (b - c)
+	mflo $t1 # quotient
+	div $t1, $a3 # a * (b - c) / d
+	mfhi $v0 # remainder
+
+	jr $ra
+
+
+Part 3:
+
+##
+##	Program3.asm is a loop implementation
+##	of the Fibonacci function
+##        
+
+#################################
+#					 	#
+#		text segment		#
+#						#
+#################################
+
+	.text		
+.globl __start
+ 
+  __start:		# execution starts here
+	li $a0,7	# to calculate fib(7)
+	jal fib		# call fib
+	move $a0,$v0	# print result
+	li $v0, 1
+	syscall
+
+	la $a0,endl	# print newline
+	li $v0,4
+	syscall
+
+	li $v0,10
+	syscall		# bye bye
+
+#------------------------------------------------
+
+
+  fib:	move $v0,$a0	# initialise last element
+	blt $a0,2,done	# fib(0)=0, fib(1)=1
+
+	li $t0,0	# second last element
+	li $v0,1	# last element
+
+  loop:	add $t1,$t0,$v0	# get next value
+	move $t0,$v0	# update second last
+	move $v0,$t1	# update last element
+	sub $a0,$a0,1	# decrement count
+	bgt $a0,1,loop	# exit loop when count=0
+  done:	jr $ra
+
+#################################
+#					 	#
+#     	 data segment		#
+#						#
+#################################
+
+	.data
+endl:	.asciiz "\n"
+
+##
+## end of Program3.asm
+
+
+Part 4:
+
+.data
+	message:    .asciiz "The equation is (A-b)modC + (d/b)modA \n"
+	input:      .asciiz "Enter integers a, b, c, d sequentially: \n"
+	result:     .asciiz "Result: "	
+
+.text
+
+    main:
+    	# Displaying the equation
+	li $v0, 4
+	la $a0, message
+	syscall
+
+	# Prompt the user to input a, b, c, d
+	li $v0, 4 
+	la $a0, input
+	syscall
+	
+	# Store integers a, b, c, d
+	# $a0 = a, $a1 = b, $a2 = c, $a3 = d 
+	li $v0, 5
+	syscall
+	add $a0, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a1, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a2, $v0, 0
+	
+	li $v0, 5
+	syscall
+	add $a3, $v0, 0
+	
+	sub $t0, $a0, $a1 # (A - b)
+	
+	div $a3, $a1 # d / b
+	mflo $t1 
+	
+	div $t0, $a2 # (A-b) mod C
+	mfhi $t2
+	
+	div $t1, $a0 # (d/b) mod A
+	mfhi $t3
+	
+	add $t4, $t2, $t3 # (A-b)modC + (d/b)modA
+	
+	# Displaying result
+	addi $s0, $v0, 0
+	li $v0, 4 
+	la $a0, result
+	syscall
+	
+	li $v0, 1
+	move $a0, $t4
+	syscall
+	
+	# This signals the end of program
+	li $v0, 10
+	syscall
